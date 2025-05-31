@@ -1,10 +1,11 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Employee, Department, PerformanceReview, PerformanceGoal, PerformanceNote
+from .mixins import SelectableFieldsSerializer
 
 
-class DepartmentSerializer(serializers.ModelSerializer):
-    """Serializer for Department model"""
+class DepartmentSerializer(SelectableFieldsSerializer):
+    """Serializer for Department model with dynamic field selection"""
     
     class Meta:
         model = Department
@@ -12,8 +13,8 @@ class DepartmentSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at']
 
 
-class UserSerializer(serializers.ModelSerializer):
-    """Serializer for User model"""
+class UserSerializer(SelectableFieldsSerializer):
+    """Serializer for User model with dynamic field selection"""
     
     class Meta:
         model = User
@@ -21,8 +22,8 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
 
-class EmployeeSerializer(serializers.ModelSerializer):
-    """Serializer for Employee model"""
+class EmployeeSerializer(SelectableFieldsSerializer):
+    """Serializer for Employee model with dynamic field selection"""
     user = UserSerializer(read_only=True)
     department = DepartmentSerializer(read_only=True)
     department_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
@@ -51,8 +52,8 @@ class EmployeeSerializer(serializers.ModelSerializer):
         return value
 
 
-class EmployeeCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating new employees"""
+class EmployeeCreateSerializer(SelectableFieldsSerializer):
+    """Serializer for creating new employees with dynamic field selection"""
     username = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True, min_length=8)
     department_id = serializers.IntegerField(required=False, allow_null=True)
@@ -99,8 +100,8 @@ class EmployeeCreateSerializer(serializers.ModelSerializer):
         return employee
 
 
-class PerformanceReviewSerializer(serializers.ModelSerializer):
-    """Serializer for PerformanceReview model"""
+class PerformanceReviewSerializer(SelectableFieldsSerializer):
+    """Serializer for PerformanceReview model with dynamic field selection"""
     employee = EmployeeSerializer(read_only=True)
     employee_id = serializers.IntegerField(write_only=True)
     reviewer = UserSerializer(read_only=True)
@@ -133,8 +134,8 @@ class PerformanceReviewSerializer(serializers.ModelSerializer):
         return data
 
 
-class PerformanceGoalSerializer(serializers.ModelSerializer):
-    """Serializer for PerformanceGoal model"""
+class PerformanceGoalSerializer(SelectableFieldsSerializer):
+    """Serializer for PerformanceGoal model with dynamic field selection"""
     employee = EmployeeSerializer(read_only=True)
     employee_id = serializers.IntegerField(write_only=True)
     created_by = UserSerializer(read_only=True)
@@ -173,8 +174,8 @@ class PerformanceGoalSerializer(serializers.ModelSerializer):
         return data
 
 
-class PerformanceNoteSerializer(serializers.ModelSerializer):
-    """Serializer for PerformanceNote model"""
+class PerformanceNoteSerializer(SelectableFieldsSerializer):
+    """Serializer for PerformanceNote model with dynamic field selection"""
     employee = EmployeeSerializer(read_only=True)
     employee_id = serializers.IntegerField(write_only=True)
     author = UserSerializer(read_only=True)
@@ -196,8 +197,8 @@ class PerformanceNoteSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at']
 
 
-class EmployeePerformanceSerializer(serializers.ModelSerializer):
-    """Comprehensive serializer for employee performance overview"""
+class EmployeePerformanceSerializer(SelectableFieldsSerializer):
+    """Comprehensive serializer for employee performance overview with dynamic field selection"""
     user = UserSerializer(read_only=True)
     department = DepartmentSerializer(read_only=True)
     full_name = serializers.CharField(read_only=True)

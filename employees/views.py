@@ -1,13 +1,14 @@
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth.models import User
 from django.db.models import Q, Avg, Count
 from datetime import date, timedelta
 
 from .models import Employee, Department, PerformanceReview, PerformanceGoal, PerformanceNote
+from .mixins import OptimizedQueryMixin
 from .serializers import (
     EmployeeSerializer, 
     EmployeeCreateSerializer, 
@@ -20,9 +21,9 @@ from .serializers import (
 )
 
 
-class DepartmentViewSet(viewsets.ModelViewSet):
+class DepartmentViewSet(OptimizedQueryMixin, viewsets.ModelViewSet):
     """
-    ViewSet for managing departments
+    ViewSet for managing departments with optimized queries and dynamic field selection
     """
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
@@ -33,9 +34,9 @@ class DepartmentViewSet(viewsets.ModelViewSet):
     ordering = ['name']
 
 
-class EmployeeViewSet(viewsets.ModelViewSet):
+class EmployeeViewSet(OptimizedQueryMixin, viewsets.ModelViewSet):
     """
-    ViewSet for managing employees
+    ViewSet for managing employees with optimized queries and dynamic field selection
     """
     queryset = Employee.objects.select_related('user', 'department').all()
     permission_classes = [IsAuthenticated]
@@ -132,9 +133,9 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class PerformanceReviewViewSet(viewsets.ModelViewSet):
+class PerformanceReviewViewSet(OptimizedQueryMixin, viewsets.ModelViewSet):
     """
-    ViewSet for managing performance reviews
+    ViewSet for managing performance reviews with optimized queries and dynamic field selection
     """
     queryset = PerformanceReview.objects.select_related('employee', 'reviewer').all()
     serializer_class = PerformanceReviewSerializer
@@ -182,9 +183,9 @@ class PerformanceReviewViewSet(viewsets.ModelViewSet):
         return Response(stats)
 
 
-class PerformanceGoalViewSet(viewsets.ModelViewSet):
+class PerformanceGoalViewSet(OptimizedQueryMixin, viewsets.ModelViewSet):
     """
-    ViewSet for managing performance goals
+    ViewSet for managing performance goals with optimized queries and dynamic field selection
     """
     queryset = PerformanceGoal.objects.select_related('employee', 'created_by', 'review').all()
     serializer_class = PerformanceGoalSerializer
@@ -274,9 +275,9 @@ class PerformanceGoalViewSet(viewsets.ModelViewSet):
         return Response(stats)
 
 
-class PerformanceNoteViewSet(viewsets.ModelViewSet):
+class PerformanceNoteViewSet(OptimizedQueryMixin, viewsets.ModelViewSet):
     """
-    ViewSet for managing performance notes
+    ViewSet for managing performance notes with optimized queries and dynamic field selection
     """
     queryset = PerformanceNote.objects.select_related('employee', 'author', 'goal', 'review').all()
     serializer_class = PerformanceNoteSerializer
