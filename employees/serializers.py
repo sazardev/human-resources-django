@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Employee, Department
+from .models import Employee, Department, PerformanceReview, PerformanceGoal, PerformanceNote
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -97,3 +97,126 @@ class EmployeeCreateSerializer(serializers.ModelSerializer):
         )
         
         return employee
+
+
+class PerformanceReviewSerializer(serializers.ModelSerializer):
+    """Serializer for PerformanceReview model"""
+    employee = EmployeeSerializer(read_only=True)
+    employee_id = serializers.IntegerField(write_only=True)
+    reviewer = UserSerializer(read_only=True)
+    reviewer_id = serializers.IntegerField(write_only=True)
+    average_rating = serializers.FloatField(read_only=True)
+    review_type_display = serializers.CharField(source='get_review_type_display', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    
+    class Meta:
+        model = PerformanceReview
+        fields = [
+            'id', 'employee', 'employee_id', 'reviewer', 'reviewer_id',
+            'review_type', 'review_type_display', 'review_period_start', 'review_period_end',
+            'review_date', 'status', 'status_display', 'overall_rating',
+            'technical_skills', 'communication', 'teamwork', 'leadership',
+            'problem_solving', 'adaptability', 'average_rating',
+            'strengths', 'areas_for_improvement', 'goals_for_next_period',
+            'reviewer_comments', 'employee_comments', 'promotion_recommendation',
+            'salary_increase_recommendation', 'training_recommendations',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+    def validate(self, data):
+        """Validate review data"""
+        if data['review_period_start'] >= data['review_period_end']:
+            raise serializers.ValidationError(
+                "Review period start date must be before end date."
+            )
+        return data
+
+
+class PerformanceGoalSerializer(serializers.ModelSerializer):
+    """Serializer for PerformanceGoal model"""
+    employee = EmployeeSerializer(read_only=True)
+    employee_id = serializers.IntegerField(write_only=True)
+    created_by = UserSerializer(read_only=True)
+    created_by_id = serializers.IntegerField(write_only=True)
+    review = PerformanceReviewSerializer(read_only=True)
+    review_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    
+    # Display fields
+    priority_display = serializers.CharField(source='get_priority_display', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    category_display = serializers.CharField(source='get_category_display', read_only=True)
+    
+    # Computed fields
+    is_overdue = serializers.BooleanField(read_only=True)
+    days_remaining = serializers.IntegerField(read_only=True)
+    
+    class Meta:
+        model = PerformanceGoal
+        fields = [
+            'id', 'employee', 'employee_id', 'title', 'description',
+            'category', 'category_display', 'priority', 'priority_display',
+            'start_date', 'target_date', 'completed_date', 'status', 'status_display',
+            'progress_percentage', 'success_criteria', 'measurable_outcomes',
+            'progress_notes', 'completion_notes', 'created_by', 'created_by_id',
+            'review', 'review_id', 'is_overdue', 'days_remaining',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'completed_date']
+
+    def validate(self, data):
+        """Validate goal data"""
+        if data['start_date'] > data['target_date']:
+            raise serializers.ValidationError(
+                "Start date must be before or equal to target date."
+            )
+        return data
+
+
+class PerformanceNoteSerializer(serializers.ModelSerializer):
+    """Serializer for PerformanceNote model"""
+    employee = EmployeeSerializer(read_only=True)
+    employee_id = serializers.IntegerField(write_only=True)
+    author = UserSerializer(read_only=True)
+    author_id = serializers.IntegerField(write_only=True)
+    goal = PerformanceGoalSerializer(read_only=True)
+    goal_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    review = PerformanceReviewSerializer(read_only=True)
+    review_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    note_type_display = serializers.CharField(source='get_note_type_display', read_only=True)
+    
+    class Meta:
+        model = PerformanceNote
+        fields = [
+            'id', 'employee', 'employee_id', 'author', 'author_id',
+            'note_type', 'note_type_display', 'title', 'content',
+            'date_observed', 'is_private', 'goal', 'goal_id',
+            'review', 'review_id', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class EmployeePerformanceSerializer(serializers.ModelSerializer):
+    """Comprehensive serializer for employee performance overview"""
+    user = UserSerializer(read_only=True)
+    department = DepartmentSerializer(read_only=True)
+    full_name = serializers.CharField(read_only=True)
+    latest_performance_review = PerformanceReviewSerializer(read_only=True)
+    average_performance_rating = serializers.FloatField(read_only=True)
+    active_goals = PerformanceGoalSerializer(many=True, read_only=True)
+    recent_notes = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Employee
+        fields = [
+            'id', 'user', 'employee_id', 'full_name', 'email',
+            'department', 'position', 'hire_date', 'employment_status',
+            'latest_performance_review', 'average_performance_rating',
+            'active_goals', 'recent_notes', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+    
+    def get_recent_notes(self, obj):
+        """Get recent performance notes (last 10)"""
+        recent_notes = obj.performance_notes.order_by('-date_observed')[:10]
+        return PerformanceNoteSerializer(recent_notes, many=True).data

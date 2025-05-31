@@ -6,6 +6,10 @@ A Django REST Framework application for managing human resources, including empl
 
 - **Employee Management**: Complete CRUD operations for employee records
 - **Department Organization**: Manage company departments and employee assignments
+- **Performance Tracking**: Comprehensive performance management system
+  - Performance Reviews with detailed ratings and feedback
+  - Performance Goals with progress tracking
+  - Performance Notes for observations and achievements
 - **REST API**: Full REST API with Django REST Framework
 - **Admin Interface**: Django admin for easy data management
 - **Environment Configuration**: Separate settings for development and production
@@ -115,6 +119,36 @@ A Django REST Framework application for managing human resources, including empl
 - `PUT /api/departments/{id}/` - Update department
 - `DELETE /api/departments/{id}/` - Delete department
 
+### Performance Reviews
+
+- `GET /api/performance-reviews/` - List all performance reviews
+- `POST /api/performance-reviews/` - Create new performance review
+- `GET /api/performance-reviews/{id}/` - Get performance review details
+- `PUT /api/performance-reviews/{id}/` - Update performance review
+- `DELETE /api/performance-reviews/{id}/` - Delete performance review
+- `GET /api/performance-reviews/statistics/` - Get review statistics
+- `GET /api/employees/{id}/performance-reviews/` - Get employee's reviews
+
+### Performance Goals
+
+- `GET /api/performance-goals/` - List all performance goals
+- `POST /api/performance-goals/` - Create new performance goal
+- `GET /api/performance-goals/{id}/` - Get performance goal details
+- `PUT /api/performance-goals/{id}/` - Update performance goal
+- `DELETE /api/performance-goals/{id}/` - Delete performance goal
+- `POST /api/performance-goals/{id}/update_progress/` - Update goal progress
+- `GET /api/performance-goals/overdue/` - Get overdue goals
+- `GET /api/employees/{id}/performance-goals/` - Get employee's goals
+
+### Performance Notes
+
+- `GET /api/performance-notes/` - List all performance notes
+- `POST /api/performance-notes/` - Create new performance note
+- `GET /api/performance-notes/{id}/` - Get performance note details
+- `PUT /api/performance-notes/{id}/` - Update performance note
+- `DELETE /api/performance-notes/{id}/` - Delete performance note
+- `GET /api/employees/{id}/performance-notes/` - Get employee's notes
+
 ## API Features
 
 ### Filtering
@@ -188,12 +222,37 @@ DB_PORT=5432
 - Personal information (name, email, phone)
 - Employment details (ID, department, position, status, salary)
 - Address information
+- Performance tracking properties
 - Timestamps
 
 ### Department Model
 
 - Name and description
 - Timestamps
+
+### Performance Models
+
+#### PerformanceReview Model
+
+- Employee and reviewer information
+- Review type and period
+- Detailed ratings (technical skills, communication, teamwork, etc.)
+- Feedback and recommendations
+- Status tracking
+
+#### PerformanceGoal Model
+
+- Goal information and categorization
+- Timeline and progress tracking
+- Success criteria and outcomes
+- Status management with automatic updates
+
+#### PerformanceNote Model
+
+- Observations and achievements
+- Note types (achievement, feedback, coaching, etc.)
+- Privacy controls
+- Associations with goals and reviews
 
 ## Development
 

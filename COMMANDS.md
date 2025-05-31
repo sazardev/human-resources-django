@@ -38,8 +38,11 @@ python manage.py runserver 8080
 ## Sample Data
 
 ```bash
-# Create sample data
+# Create sample employee and department data
 python manage.py shell -c "exec(open('create_sample_data.py').read())"
+
+# Create sample performance data
+python add_performance_data.py
 ```
 
 ## Testing
@@ -67,11 +70,19 @@ python manage.py test employees.tests.EmployeeModelTest
 - API Root: http://127.0.0.1:8000/api/
 - Employees: http://127.0.0.1:8000/api/employees/
 - Departments: http://127.0.0.1:8000/api/departments/
+- Performance Reviews: http://127.0.0.1:8000/api/performance-reviews/
+- Performance Goals: http://127.0.0.1:8000/api/performance-goals/
+- Performance Notes: http://127.0.0.1:8000/api/performance-notes/
 
 ### Special Endpoints
 
 - Employee Statistics: http://127.0.0.1:8000/api/employees/statistics/
 - Employees by Department: http://127.0.0.1:8000/api/employees/by_department/
+- Employee Performance Reviews: http://127.0.0.1:8000/api/employees/{id}/performance-reviews/
+- Employee Performance Goals: http://127.0.0.1:8000/api/employees/{id}/performance-goals/
+- Employee Performance Notes: http://127.0.0.1:8000/api/employees/{id}/performance-notes/
+- Overdue Goals: http://127.0.0.1:8000/api/performance-goals/overdue/
+- Performance Statistics: http://127.0.0.1:8000/api/performance-reviews/statistics/
 
 ### Admin Interface
 
