@@ -356,3 +356,70 @@ class PerformanceNote(models.Model):
     
     class Meta:
         ordering = ['-date_observed']
+
+
+# Django Signals for auto-creating Employee profiles
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+@receiver(post_save, sender=User)
+def create_employee_profile(sender, instance, created, **kwargs):
+    """
+    Automatically create an Employee profile when a User is created.
+    This ensures every User has a corresponding Employee record.
+    """
+    if created:
+        # Generate next employee ID
+        last_employee = Employee.objects.order_by('employee_id').last()
+        if last_employee and last_employee.employee_id:
+            # Extract number from format EMP0001 and increment
+            try:
+                last_num = int(last_employee.employee_id[3:])
+                next_num = last_num + 1
+            except (ValueError, IndexError):
+                next_num = 1
+        else:
+            next_num = 1
+        
+        new_employee_id = f"EMP{next_num:04d}"
+        
+        # Get or create a default department
+        default_department, _ = Department.objects.get_or_create(
+            name="General",
+            defaults={"description": "Departamento general para nuevos empleados"}
+        )
+        
+        # Create Employee profile
+        Employee.objects.create(
+            user=instance,
+            employee_id=new_employee_id,
+            first_name=instance.first_name or "Sin nombre",
+            last_name=instance.last_name or "Sin apellido",
+            email=instance.email or "",
+            department=default_department,
+            position="Empleado General",
+            status="active",
+            hire_date=timezone.now().date()
+        )
+
+
+@receiver(post_save, sender=User)
+def save_employee_profile(sender, instance, **kwargs):
+    """
+    Save Employee profile when User is saved.
+    This keeps basic info in sync between User and Employee.
+    """
+    try:
+        employee = instance.employee
+        # Update basic info if User info changed
+        if employee.first_name != (instance.first_name or "Sin nombre"):
+            employee.first_name = instance.first_name or "Sin nombre"
+        if employee.last_name != (instance.last_name or "Sin apellido"):
+            employee.last_name = instance.last_name or "Sin apellido"
+        if employee.email != (instance.email or ""):
+            employee.email = instance.email or ""
+        employee.save()
+    except Employee.DoesNotExist:
+        # If no Employee exists, the create_employee_profile signal will handle it
+        pass
