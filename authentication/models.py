@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
+from simple_history.models import HistoricalRecords
 
 
 class User(AbstractUser):
@@ -35,6 +36,9 @@ class User(AbstractUser):
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    
+    # History tracking
+    history = HistoricalRecords()
     
     class Meta:
         db_table = 'auth_user_extended'
@@ -84,6 +88,9 @@ class UserSession(models.Model):
         blank=True
     )
     
+    # History tracking
+    history = HistoricalRecords()
+    
     class Meta:
         verbose_name = 'Sesión de Usuario'
         verbose_name_plural = 'Sesiones de Usuario'
@@ -122,6 +129,9 @@ class LoginAttempt(models.Model):
     success = models.BooleanField(default=False)
     attempted_at = models.DateTimeField(auto_now_add=True)
     failure_reason = models.CharField(max_length=100, blank=True)
+    
+    # History tracking
+    history = HistoricalRecords()
     
     class Meta:
         verbose_name = 'Intento de Login'

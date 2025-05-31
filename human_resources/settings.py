@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',    # Third party apps
     'rest_framework',
     'rest_framework.authtoken',
-    'django_filters',    # Local apps
+    'django_filters',
+    'simple_history',    # Local apps
     'employees',
     'authentication',
 ]
@@ -57,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'human_resources.urls'

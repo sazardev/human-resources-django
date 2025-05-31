@@ -1,13 +1,14 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.html import format_html
+from simple_history.admin import SimpleHistoryAdmin
 from .models import User, UserSession, LoginAttempt
 
 
 @admin.register(User)
-class UserAdmin(BaseUserAdmin):
+class UserAdmin(SimpleHistoryAdmin, BaseUserAdmin):
     """
-    Admin configuration for User model
+    Admin configuration for User model with history tracking
     """
     list_display = [
         'email', 'username', 'full_name', 'employee_id', 
@@ -60,9 +61,9 @@ class UserAdmin(BaseUserAdmin):
 
 
 @admin.register(UserSession)
-class UserSessionAdmin(admin.ModelAdmin):
+class UserSessionAdmin(SimpleHistoryAdmin):
     """
-    Admin configuration for UserSession model
+    Admin configuration for UserSession model with history tracking
     """
     list_display = [
         'user_email', 'ip_address', 'status_display', 
@@ -130,9 +131,9 @@ class UserSessionAdmin(admin.ModelAdmin):
 
 
 @admin.register(LoginAttempt)
-class LoginAttemptAdmin(admin.ModelAdmin):
+class LoginAttemptAdmin(SimpleHistoryAdmin):
     """
-    Admin configuration for LoginAttempt model
+    Admin configuration for LoginAttempt model with history tracking
     """
     list_display = [
         'email', 'ip_address', 'success_status', 

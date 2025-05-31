@@ -1,9 +1,10 @@
 from django.contrib import admin
+from simple_history.admin import SimpleHistoryAdmin
 from .models import Employee, Department, PerformanceReview, PerformanceGoal, PerformanceNote
 
 
 @admin.register(Department)
-class DepartmentAdmin(admin.ModelAdmin):
+class DepartmentAdmin(SimpleHistoryAdmin):
     list_display = ['name', 'description', 'created_at']
     search_fields = ['name', 'description']
     list_filter = ['created_at']
@@ -11,7 +12,7 @@ class DepartmentAdmin(admin.ModelAdmin):
 
 
 @admin.register(Employee)
-class EmployeeAdmin(admin.ModelAdmin):
+class EmployeeAdmin(SimpleHistoryAdmin):
     list_display = [
         'employee_id', 'first_name', 'last_name', 'email', 
         'department', 'position', 'employment_status', 'hire_date'
@@ -41,7 +42,7 @@ class EmployeeAdmin(admin.ModelAdmin):
 
 
 @admin.register(PerformanceReview)
-class PerformanceReviewAdmin(admin.ModelAdmin):
+class PerformanceReviewAdmin(SimpleHistoryAdmin):
     list_display = [
         'employee', 'reviewer', 'review_type', 'review_date', 
         'overall_rating', 'status', 'created_at'
@@ -88,7 +89,7 @@ class PerformanceReviewAdmin(admin.ModelAdmin):
 
 
 @admin.register(PerformanceGoal)
-class PerformanceGoalAdmin(admin.ModelAdmin):
+class PerformanceGoalAdmin(SimpleHistoryAdmin):
     list_display = [
         'title', 'employee', 'category', 'priority', 'status', 
         'progress_percentage', 'target_date', 'created_by'
@@ -127,7 +128,7 @@ class PerformanceGoalAdmin(admin.ModelAdmin):
 
 
 @admin.register(PerformanceNote)
-class PerformanceNoteAdmin(admin.ModelAdmin):
+class PerformanceNoteAdmin(SimpleHistoryAdmin):
     list_display = [
         'title', 'employee', 'author', 'note_type', 
         'date_observed', 'is_private', 'created_at'

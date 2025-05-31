@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from datetime import date
+from simple_history.models import HistoricalRecords
 
 User = get_user_model()
 
@@ -14,6 +15,9 @@ class Department(models.Model):
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    # History tracking
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.name
@@ -62,9 +66,7 @@ class Employee(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.employee_id})"
-
-    @property
+        return f"{self.first_name} {self.last_name} ({self.employee_id})"    @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
     
@@ -88,6 +90,9 @@ class Employee(models.Model):
         return self.performance_goals.filter(
             status__in=['in_progress', 'pending']
         ).order_by('-created_at')
+    
+    # History tracking
+    history = HistoricalRecords()
 
     class Meta:
         ordering = ['employee_id']
@@ -175,10 +180,12 @@ class PerformanceReview(models.Model):
     promotion_recommendation = models.BooleanField(default=False)
     salary_increase_recommendation = models.BooleanField(default=False)
     training_recommendations = models.TextField(blank=True, null=True)
-    
-    # Timestamps
+      # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    # History tracking
+    history = HistoricalRecords()
     
     def __str__(self):
         return f"{self.employee.full_name} - {self.get_review_type_display()} ({self.review_date})"
@@ -269,8 +276,7 @@ class PerformanceGoal(models.Model):
         PerformanceReview, on_delete=models.SET_NULL, 
         null=True, blank=True,
         related_name='goals',
-        help_text="Associated performance review"
-    )
+        help_text="Associated performance review"    )
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -303,8 +309,10 @@ class PerformanceGoal(models.Model):
                 self.completed_date = date.today()
         elif self.is_overdue and self.status not in ['completed', 'cancelled']:
             self.status = 'overdue'
-        
         super().save(*args, **kwargs)
+    
+    # History tracking
+    history = HistoricalRecords()
     
     class Meta:
         ordering = ['-created_at']
@@ -346,10 +354,12 @@ class PerformanceNote(models.Model):
         related_name='notes',
         help_text="Associated performance review"
     )
-    
-    # Timestamps
+      # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    # History tracking
+    history = HistoricalRecords()
     
     def __str__(self):
         return f"{self.employee.full_name} - {self.title} ({self.get_note_type_display()})"
