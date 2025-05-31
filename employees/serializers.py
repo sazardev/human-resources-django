@@ -1,7 +1,9 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from .models import Employee, Department, PerformanceReview, PerformanceGoal, PerformanceNote
 from .mixins import SelectableFieldsSerializer
+
+User = get_user_model()
 
 
 class DepartmentSerializer(SelectableFieldsSerializer):

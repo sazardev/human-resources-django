@@ -44,9 +44,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',    # Third party apps
     'rest_framework',
     'rest_framework.authtoken',
-    'django_filters',
-    # Local apps
+    'django_filters',    # Local apps
     'employees',
+    'authentication',
 ]
 
 MIDDLEWARE = [
@@ -94,6 +94,9 @@ DATABASES = {
     }
 }
 
+
+# Custom User Model
+AUTH_USER_MODEL = 'authentication.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

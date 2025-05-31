@@ -1,8 +1,11 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from datetime import date
+
+User = get_user_model()
 
 
 class Department(models.Model):
@@ -28,9 +31,8 @@ class Employee(models.Model):
         ('terminated', 'Terminated'),
         ('on_leave', 'On Leave'),
     ]
-    
-    # Personal Information
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employee_profile')
+      # Personal Information
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='employee_profile')
     employee_id = models.CharField(max_length=20, unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -116,10 +118,9 @@ class PerformanceReview(models.Model):
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
     ]
-    
-    # Basic Information
+      # Basic Information
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='performance_reviews')
-    reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='conducted_reviews')
+    reviewer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='conducted_reviews')
     review_type = models.CharField(max_length=20, choices=REVIEW_TYPE_CHOICES)
     review_period_start = models.DateField()
     review_period_end = models.DateField()
@@ -258,10 +259,9 @@ class PerformanceGoal(models.Model):
       # Comments and Notes
     progress_notes = models.TextField(blank=True, null=True, help_text="Progress notes and updates")
     completion_notes = models.TextField(blank=True, null=True, help_text="Notes upon completion")
-    
-    # Review Information
+      # Review Information
     created_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, 
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, 
         related_name='created_goals',
         help_text="Who created this goal"
     )
@@ -323,7 +323,7 @@ class PerformanceNote(models.Model):
     ]
     
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='performance_notes')
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='authored_notes')
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='authored_notes')
     note_type = models.CharField(max_length=15, choices=NOTE_TYPE_CHOICES)
     title = models.CharField(max_length=200)
     content = models.TextField()
