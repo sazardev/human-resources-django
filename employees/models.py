@@ -60,13 +60,14 @@ class Employee(models.Model):
     state = models.CharField(max_length=50, blank=True, null=True)
     postal_code = models.CharField(max_length=10, blank=True, null=True)
     country = models.CharField(max_length=50, default='Mexico')
-    
-    # Timestamps
+      # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.employee_id})"    @property
+        return f"{self.first_name} {self.last_name} ({self.employee_id})"
+    
+    @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
     
