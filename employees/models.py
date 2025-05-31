@@ -389,68 +389,42 @@ def create_employee_profile(sender, instance, created, **kwargs):
             name="General",
             defaults={"description": "Departamento general para nuevos empleados"}
         )
-        
-        # Create Employee profile
-        Employee.objects.create(
-            user=instance,
-            employee_id=new_employee_id,
-            first_name=instance.first_name or "Sin nombre",
-            last_name=instance.last_name or "Sin apellido",
-            email=instance.email or "",
-            department=default_department,
-            position="Empleado General",
-            employment_status="active",
-            hire_date=timezone.now().date()
-        )
-        last_employee = Employee.objects.order_by('employee_id').last()
-        if last_employee and last_employee.employee_id:
-            # Extract number from format EMP0001 and increment
-            try:
-                last_num = int(last_employee.employee_id[3:])
-                next_num = last_num + 1
-            except (ValueError, IndexError):
-                next_num = 1
-        else:
-            next_num = 1
-        
-        new_employee_id = f"EMP{next_num:04d}"
-        
-        # Get or create a default department
-        default_department, _ = Department.objects.get_or_create(
-            name="General",
-            defaults={"description": "Departamento general para nuevos empleados"}
-        )
-        
-        # Create Employee profile
-        Employee.objects.create(
-            user=instance,
-            employee_id=new_employee_id,
-            first_name=instance.first_name or "Sin nombre",
-            last_name=instance.last_name or "Sin apellido",
-            email=instance.email or "",
-            department=default_department,
-            position="Empleado General",
-            status="active",
-            hire_date=timezone.now().date()
-        )
+          # Create Employee profile
+        try:
+            Employee.objects.create(
+                user=instance,
+                employee_id=new_employee_id,
+                first_name=instance.first_name or "Sin nombre",
+                last_name=instance.last_name or "Sin apellido",
+                email=instance.email or "",
+                department=default_department,
+                position="Empleado General",
+                employment_status="active",
+                hire_date=timezone.now().date()
+            )
+        except Exception as e:
+            # Log the error but don't crash the user creation process
+            print(f"Error creating Employee profile for User {instance.username}: {e}")
 
 
 @receiver(post_save, sender=User)
-def save_employee_profile(sender, instance, **kwargs):
+def save_employee_profile(sender, instance, created, **kwargs):
     """
     Save Employee profile when User is saved.
     This keeps basic info in sync between User and Employee.
     """
-    try:
-        employee = instance.employee_profile  # ← Corregido: usar employee_profile
-        # Update basic info if User info changed
-        if employee.first_name != (instance.first_name or "Sin nombre"):
-            employee.first_name = instance.first_name or "Sin nombre"
-        if employee.last_name != (instance.last_name or "Sin apellido"):
-            employee.last_name = instance.last_name or "Sin apellido"
-        if employee.email != (instance.email or ""):
-            employee.email = instance.email or ""
-        employee.save()
-    except Employee.DoesNotExist:
-        # If no Employee exists, the create_employee_profile signal will handle it
-        pass
+    # Solo ejecutar si el User ya existía (no es nuevo)
+    if not created:
+        try:
+            employee = instance.employee_profile  # Fixed: use correct related_name
+            # Update basic info if User info changed
+            if employee.first_name != (instance.first_name or "Sin nombre"):
+                employee.first_name = instance.first_name or "Sin nombre"
+            if employee.last_name != (instance.last_name or "Sin apellido"):
+                employee.last_name = instance.last_name or "Sin apellido"
+            if employee.email != (instance.email or ""):
+                employee.email = instance.email or ""
+            employee.save()
+        except Employee.DoesNotExist:
+            # Si no existe Employee, no hacer nada (la otra señal se encarga)
+            pass
