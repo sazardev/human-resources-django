@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'simple_history',    # Local apps
     'employees',
     'authentication',
+    'leaves',
 ]
 
 MIDDLEWARE = [
