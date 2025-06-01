@@ -23,6 +23,7 @@ urlpatterns = [
     path('api/', include('employees.urls')),
     path('api/auth/', include('authentication.urls')),
     path('api/payroll/', include('payroll.urls')),
+    path('api/attendance/', include('attendance.urls')),
     path('', include('leaves.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
