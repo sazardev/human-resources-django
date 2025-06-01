@@ -88,7 +88,7 @@ class DeductionTypeAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'description', 'code')
+            'fields': ('name', 'description')
         }),
         ('Calculation', {
             'fields': ('calculation_method', 'default_amount')
@@ -107,7 +107,7 @@ class BonusTypeAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'description', 'code')
+            'fields': ('name', 'description')
         }),
         ('Calculation', {
             'fields': ('calculation_method', 'default_amount')
@@ -195,8 +195,7 @@ class PayslipAdmin(admin.ModelAdmin):
 class CompensationHistoryAdmin(admin.ModelAdmin):
     list_display = [
         'employee_name', 'change_type', 'previous_salary', 'new_salary', 
-        'salary_change', 'effective_date', 'created_at'
-    ]
+        'salary_change', 'effective_date', 'created_at'    ]
     list_filter = ['change_type', 'effective_date', 'created_at']
     search_fields = [
         'employee__first_name', 'employee__last_name', 
@@ -227,21 +226,48 @@ class CompensationHistoryAdmin(admin.ModelAdmin):
     employee_name.admin_order_field = 'employee__first_name'
     
     def previous_salary(self, obj):
+        if obj.previous_salary is None:
+            return "N/A (Initial)"
         return f"${obj.previous_salary:,.2f}"
     previous_salary.short_description = 'Previous Salary'
     previous_salary.admin_order_field = 'previous_salary'
     
     def new_salary(self, obj):
+        if obj.new_salary is None:
+            return "N/A"
         return f"${obj.new_salary:,.2f}"
     new_salary.short_description = 'New Salary'
     new_salary.admin_order_field = 'new_salary'
     
     def salary_change(self, obj):
-        change = obj.new_salary - obj.previous_salary
-        if change > 0:
-            return format_html('<span style="color: green;">+${:,.2f}</span>', change)
-        elif change < 0:
-            return format_html('<span style="color: red;">${:,.2f}</span>', change)
-        else:
-            return '$0.00'
+        # Handle cases where either salary could be None
+        if obj.previous_salary is None and obj.new_salary is None:
+            return '-'
+        elif obj.previous_salary is None:
+            if obj.new_salary is not None:
+                # Format the amount first, then pass to format_html
+                amount = f"${float(obj.new_salary):,.2f}"
+                return format_html('<span style="color: blue;">Initial: {}</span>', amount)
+            else:
+                return '-'
+        elif obj.new_salary is None:
+            return '-'
+        
+        try:
+            # Convert to float to avoid SafeString formatting issues
+            previous_val = float(obj.previous_salary)
+            new_val = float(obj.new_salary)
+            change = new_val - previous_val
+            
+            if change > 0:
+                amount = f"+${change:,.2f}"
+                return format_html('<span style="color: green;">{}</span>', amount)
+            elif change < 0:
+                amount = f"${change:,.2f}"
+                return format_html('<span style="color: red;">{}</span>', amount)
+            else:
+                return '$0.00'
+        except (TypeError, AttributeError, ValueError):
+            return '-'
     salary_change.short_description = 'Change'
+    salary_change.admin_order_field = 'new_salary'
