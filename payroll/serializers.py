@@ -8,12 +8,13 @@ from .models import (
     PayrollConfiguration
 )
 from employees.models import Employee, PerformanceReview
+from employees.mixins import SelectableFieldsSerializer
 
 User = get_user_model()
 
 
-class PayrollPeriodSerializer(serializers.ModelSerializer):
-    """Serializer for PayrollPeriod model"""
+class PayrollPeriodSerializer(SelectableFieldsSerializer):
+    """Serializer for PayrollPeriod model with dynamic field selection"""
     
     total_employees = serializers.ReadOnlyField()
     is_editable = serializers.ReadOnlyField()
@@ -40,8 +41,8 @@ class PayrollPeriodSerializer(serializers.ModelSerializer):
         return data
 
 
-class TaxBracketSerializer(serializers.ModelSerializer):
-    """Serializer for TaxBracket model"""
+class TaxBracketSerializer(SelectableFieldsSerializer):
+    """Serializer for TaxBracket model with dynamic field selection"""
     
     tax_rate_percentage = serializers.SerializerMethodField()
     
@@ -68,8 +69,8 @@ class TaxBracketSerializer(serializers.ModelSerializer):
         return data
 
 
-class DeductionTypeSerializer(serializers.ModelSerializer):
-    """Serializer for DeductionType model"""
+class DeductionTypeSerializer(SelectableFieldsSerializer):
+    """Serializer for DeductionType model with dynamic field selection"""
     
     default_amount_display = serializers.SerializerMethodField()
     
@@ -89,8 +90,8 @@ class DeductionTypeSerializer(serializers.ModelSerializer):
             return f"${obj.default_amount:.2f}"
 
 
-class BonusTypeSerializer(serializers.ModelSerializer):
-    """Serializer for BonusType model"""
+class BonusTypeSerializer(SelectableFieldsSerializer):
+    """Serializer for BonusType model with dynamic field selection"""
     
     default_amount_display = serializers.SerializerMethodField()
     
@@ -110,8 +111,8 @@ class BonusTypeSerializer(serializers.ModelSerializer):
             return f"${obj.default_amount:.2f}"
 
 
-class PayslipDeductionSerializer(serializers.ModelSerializer):
-    """Serializer for PayslipDeduction model"""
+class PayslipDeductionSerializer(SelectableFieldsSerializer):
+    """Serializer for PayslipDeduction model with dynamic field selection"""
     
     deduction_type_name = serializers.CharField(source='deduction_type.name', read_only=True)
     calculation_method = serializers.CharField(source='deduction_type.calculation_method', read_only=True)
@@ -124,8 +125,8 @@ class PayslipDeductionSerializer(serializers.ModelSerializer):
         ]
 
 
-class PayslipBonusSerializer(serializers.ModelSerializer):
-    """Serializer for PayslipBonus model"""
+class PayslipBonusSerializer(SelectableFieldsSerializer):
+    """Serializer for PayslipBonus model with dynamic field selection"""
     
     bonus_type_name = serializers.CharField(source='bonus_type.name', read_only=True)
     calculation_method = serializers.CharField(source='bonus_type.calculation_method', read_only=True)
@@ -140,8 +141,8 @@ class PayslipBonusSerializer(serializers.ModelSerializer):
         ]
 
 
-class PayslipSerializer(serializers.ModelSerializer):
-    """Serializer for Payslip model"""
+class PayslipSerializer(SelectableFieldsSerializer):
+    """Serializer for Payslip model with dynamic field selection"""
     
     employee_name = serializers.CharField(source='employee.full_name', read_only=True)
     employee_id = serializers.CharField(source='employee.employee_id', read_only=True)
@@ -188,8 +189,8 @@ class PayslipSerializer(serializers.ModelSerializer):
         return data
 
 
-class PayslipSummarySerializer(serializers.ModelSerializer):
-    """Lightweight serializer for payslip summaries"""
+class PayslipSummarySerializer(SelectableFieldsSerializer):
+    """Lightweight serializer for payslip summaries with dynamic field selection"""
     
     employee_name = serializers.CharField(source='employee.full_name', read_only=True)
     employee_id = serializers.CharField(source='employee.employee_id', read_only=True)
@@ -204,8 +205,8 @@ class PayslipSummarySerializer(serializers.ModelSerializer):
         ]
 
 
-class CompensationHistorySerializer(serializers.ModelSerializer):
-    """Serializer for CompensationHistory model"""
+class CompensationHistorySerializer(SelectableFieldsSerializer):
+    """Serializer for CompensationHistory model with dynamic field selection"""
     
     employee_name = serializers.CharField(source='employee.full_name', read_only=True)
     employee_id = serializers.CharField(source='employee.employee_id', read_only=True)
@@ -241,8 +242,8 @@ class CompensationHistorySerializer(serializers.ModelSerializer):
         return data
 
 
-class PayrollConfigurationSerializer(serializers.ModelSerializer):
-    """Serializer for PayrollConfiguration model"""
+class PayrollConfigurationSerializer(SelectableFieldsSerializer):
+    """Serializer for PayrollConfiguration model with dynamic field selection"""
     
     class Meta:
         model = PayrollConfiguration
@@ -271,8 +272,8 @@ class PayrollConfigurationSerializer(serializers.ModelSerializer):
 
 
 # Employee extension serializers for payroll integration
-class EmployeePayrollSerializer(serializers.ModelSerializer):
-    """Serializer for Employee model with payroll-specific fields"""
+class EmployeePayrollSerializer(SelectableFieldsSerializer):
+    """Serializer for Employee model with payroll-specific fields and dynamic field selection"""
     
     current_salary = serializers.DecimalField(source='salary', max_digits=10, decimal_places=2, read_only=True)
     latest_payslip = PayslipSummarySerializer(source='payslips.first', read_only=True)
