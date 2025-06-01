@@ -45,13 +45,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
-    'simple_history',
-    # Local apps
+    'simple_history',    # Local apps
     'employees',
     'authentication',
     'leaves',
     'payroll',
     'attendance',
+    'recruitment',
 ]
 
 MIDDLEWARE = [
